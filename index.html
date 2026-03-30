@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DigiTools - Supercharge Your Digital Workflow</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<!-- React + ReactDOM + Babel (for JSX in browser) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+/* ===== RESET & ROOT ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple: #7c3aed;
+  --purple-light: #8b5cf6;
+  --purple-dark: #6d28d9;
+  --text-dark: #111827;
+  --text-gray: #6b7280;
+  --border: #e5e7eb;
+  --bg-light: #f3f4f6;
+  --success: #10b981;
+}
+body { font-family: 'Manrope', sans-serif; color: var(--text-dark); background: #fff; line-height: 1.6; }
+a { text-decoration: none; }
+
+/* ===== TOAST ===== */
+#toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast {
+  padding: 14px 20px; border-radius: 10px; color: white; font-size: 0.9rem; font-weight: 600;
+  font-family: 'Manrope', sans-serif; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  animation: slideIn 0.3s ease; max-width: 320px; display: flex; align-items: center; gap: 10px;
+}
+.toast-success { background: #10b981; }
+.toast-error   { background: #ef4444; }
+.toast-warning { background: #f59e0b; }
+@keyframes slideIn { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+@keyframes slideOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(40px); } }
+
+/* ===== NAVBAR ===== */
+.navbar { position: sticky; top:0; z-index:100; background:#fff; border-bottom:1px solid var(--border); box-shadow:0 1px 4px rgba(0,0,0,.05); }
+.navbar-inner { max-width:1200px; margin:0 auto; padding:0 24px; height:68px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.logo { font-size:1.5rem; font-weight:800; }
+.logo span:first-child { color:var(--purple); }
+.logo span:last-child  { color:var(--text-dark); }
+.nav-links { display:flex; list-style:none; gap:28px; }
+.nav-links a { color:var(--text-dark); font-size:.93rem; font-weight:500; transition:color .2s; }
+.nav-links a:hover { color:var(--purple); }
+.navbar-right { display:flex; align-items:center; gap:14px; }
+.cart-wrap { position:relative; cursor:pointer; }
+.cart-wrap img { width:24px; height:24px; object-fit:contain; }
+.cart-badge {
+  position:absolute; top:-8px; right:-8px; background:var(--purple); color:#fff;
+  font-size:.65rem; font-weight:700; width:18px; height:18px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+}
+.btn-login { background:none; border:none; font-family:'Manrope',sans-serif; font-size:.93rem; font-weight:600; color:var(--text-dark); cursor:pointer; transition:color .2s; }
+.btn-login:hover { color:var(--purple); }
+.btn-getstarted { background:var(--purple); color:#fff; border:none; padding:10px 22px; border-radius:50px; font-family:'Manrope',sans-serif; font-size:.93rem; font-weight:700; cursor:pointer; transition:background .2s; }
+.btn-getstarted:hover { background:var(--purple-dark); }
+
+/* ===== BANNER ===== */
+.banner { padding:60px 24px 48px; background:#fff; }
+.banner-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:60px; }
+.banner-left { flex:1; max-width:540px; animation:fadeInUp .6s ease both; }
+.banner-right { flex:1; display:flex; justify-content:center; animation:fadeInUp .6s .15s ease both; }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);} }
+.banner-badge { display:inline-flex; align-items:center; gap:8px; background:#f3f0ff; color:var(--purple); border-radius:50px; padding:6px 16px; font-size:.82rem; font-weight:600; margin-bottom:24px; }
+.badge-dot { width:7px; height:7px; background:var(--purple); border-radius:50%; }
+.banner h1 { font-size:3.2rem; font-weight:800; line-height:1.15; color:var(--text-dark); margin-bottom:20px; letter-spacing:-1px; }
+.banner p { font-size:1rem; color:var(--text-gray); margin-bottom:32px; line-height:1.7; }
+.banner-btns { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.btn-explore { background:var(--purple); color:#fff; border:none; padding:14px 28px; border-radius:50px; font-family:'Manrope',sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; transition:background .2s; }
+.btn-explore:hover { background:var(--purple-dark); }
+.btn-watch { display:flex; align-items:center; gap:8px; background:#fff; color:var(--text-dark); border:1.5px solid var(--border); padding:13px 22px; border-radius:50px; font-family:'Manrope',sans-serif; font-size:.95rem; font-weight:600; cursor:pointer; transition:border-color .2s; }
+.btn-watch:hover { border-color:var(--purple); }
+.btn-watch img { width:16px; height:16px; object-fit:contain; }
+.banner-img-wrap { border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(124,58,237,.12); max-width:480px; width:100%; }
+.banner-img-wrap img { width:100%; display:block; object-fit:cover; }
+
+/* ===== STATS ===== */
+.stats { background:linear-gradient(90deg,#7c3aed,#a855f7); padding:48px 24px; }
+.stats-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:center; }
+.stat { flex:1; text-align:center; padding:0 40px; }
+.stat h2 { font-size:3rem; font-weight:800; color:#fff; letter-spacing:-1px; margin-bottom:8px; }
+.stat p { font-size:1rem; color:rgba(255,255,255,.75); font-weight:500; }
+.stat-div { width:1px; height:60px; background:rgba(255,255,255,.25); }
+
+/* ===== SECTION COMMON ===== */
+.section-badge { display:inline-block; background:#f3f0ff; color:var(--purple); font-size:.8rem; font-weight:700; padding:6px 16px; border-radius:50px; margin-bottom:14px; text-transform:uppercase; letter-spacing:.5px; }
+.section-title { font-size:2.2rem; font-weight:800; color:var(--text-dark); text-align:center; margin-bottom:12px; letter-spacing:-.5px; }
+.section-sub { font-size:.97rem; color:var(--text-gray); text-align:center; max-width:520px; margin:0 auto 32px; line-height:1.7; }
+
+/* ===== PRODUCTS ===== */
+.products-sec { padding:80px 24px; background:#fff; }
+.products-inner { max-width:1200px; margin:0 auto; }
+.tab-btns { display:flex; justify-content:center; gap:0; margin-bottom:0; }
+.tab-btn { background:none; border:none; font-family:'Manrope',sans-serif; font-size:1rem; font-weight:600; color:var(--text-gray); padding:10px 32px; cursor:pointer; border-radius:50px; transition:all .2s; }
+.tab-btn.active { background:var(--purple); color:#fff; }
+.tab-line { width:32px; height:3px; background:var(--purple); margin:12px auto 40px; border-radius:2px; }
+.products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+
+/* Product Card */
+.pcard { border:1.5px solid var(--border); border-radius:16px; padding:28px 24px; position:relative; transition:box-shadow .2s,transform .2s; background:#fff; }
+.pcard:hover { box-shadow:0 8px 32px rgba(124,58,237,.12); transform:translateY(-2px); }
+.ptag { position:absolute; top:18px; right:18px; font-size:.75rem; font-weight:700; padding:4px 12px; border-radius:50px; }
+.tag-popular   { background:#f3f0ff; color:var(--purple); }
+.tag-new       { background:#d1fae5; color:#059669; }
+.tag-bestseller{ background:#fef3c7; color:#d97706; }
+.picon { width:48px; height:48px; margin-bottom:14px; }
+.picon img { width:100%; height:100%; object-fit:contain; }
+.pname { font-size:1.1rem; font-weight:800; color:var(--text-dark); margin-bottom:8px; }
+.pdesc { font-size:.88rem; color:var(--text-gray); margin-bottom:14px; line-height:1.6; }
+.pprice { margin-bottom:14px; }
+.pprice .amount { font-size:1.6rem; font-weight:800; color:var(--text-dark); }
+.pprice .period { font-size:.9rem; color:var(--text-gray); font-weight:500; }
+.pfeatures { list-style:none; margin-bottom:20px; }
+.pfeatures li { font-size:.88rem; color:var(--text-gray); margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+.fcheck { color:var(--success); font-weight:700; }
+.btn-buy { width:100%; background:var(--purple); color:#fff; border:none; padding:13px; border-radius:10px; font-family:'Manrope',sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.btn-buy:hover { background:var(--purple-dark); }
+.btn-buy.added { background:var(--success); }
+
+/* ===== CART ===== */
+.cart-wrap-box { max-width:860px; margin:0 auto; }
+.cart-box { border:1.5px solid var(--border); border-radius:16px; padding:32px; background:#fff; }
+.cart-title { font-size:1.4rem; font-weight:800; color:var(--text-dark); margin-bottom:24px; }
+.cart-items-list { display:flex; flex-direction:column; gap:12px; margin-bottom:24px; }
+.cart-item { display:flex; align-items:center; justify-content:space-between; background:var(--bg-light); padding:16px 20px; border-radius:10px; }
+.cart-item-left { display:flex; align-items:center; gap:14px; }
+.cart-item-left img { width:40px; height:40px; object-fit:contain; }
+.ci-name { font-size:.97rem; font-weight:700; color:var(--text-dark); }
+.ci-price { font-size:.88rem; color:var(--text-gray); margin-top:2px; }
+.btn-remove { background:none; border:none; color:#ef4444; font-family:'Manrope',sans-serif; font-size:.9rem; font-weight:700; cursor:pointer; padding:4px 8px; }
+.btn-remove:hover { opacity:.7; }
+.cart-total { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-top:1.5px solid var(--border); margin-bottom:20px; }
+.cart-total span:first-child { font-size:.97rem; color:var(--text-gray); }
+.total-amt { font-size:1.4rem; font-weight:800; color:var(--text-dark); }
+.btn-checkout { width:100%; background:var(--purple); color:#fff; border:none; padding:16px; border-radius:12px; font-family:'Manrope',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; transition:background .2s; }
+.btn-checkout:hover { background:var(--purple-dark); }
+.cart-empty { text-align:center; padding:80px 24px; max-width:400px; margin:0 auto; }
+.cart-empty .ce-icon { font-size:4rem; margin-bottom:16px; }
+.cart-empty p { font-size:1.2rem; font-weight:700; color:var(--text-dark); margin-bottom:8px; }
+.cart-empty span { font-size:.9rem; color:var(--text-gray); }
+
+/* ===== STEPS ===== */
+.steps-sec { padding:80px 24px; background:#f8f7ff; }
+.steps-inner { max-width:1200px; margin:0 auto; }
+.steps-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; }
+.step-card { background:#fff; border-radius:16px; padding:36px 28px; text-align:center; position:relative; border:1.5px solid var(--border); transition:box-shadow .2s; }
+.step-card:hover { box-shadow:0 8px 32px rgba(124,58,237,.1); }
+.step-num { position:absolute; top:18px; right:18px; background:var(--purple); color:#fff; width:32px; height:32px; border-radius:50%; font-size:.75rem; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.step-icon-wrap { width:70px; height:70px; background:#f3f0ff; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+.step-icon-wrap img { width:36px; height:36px; object-fit:contain; }
+.step-title { font-size:1.1rem; font-weight:800; color:var(--text-dark); margin-bottom:10px; }
+.step-desc { font-size:.88rem; color:var(--text-gray); line-height:1.7; }
+
+/* ===== TESTIMONIALS ===== */
+.testi-sec { padding:80px 24px; background:#fff; }
+.testi-inner { max-width:1200px; margin:0 auto; text-align:center; }
+.testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; text-align:left; }
+.tcard { border:1.5px solid var(--border); border-radius:16px; padding:28px 24px; background:#fff; transition:box-shadow .25s,transform .25s; display:flex; flex-direction:column; gap:16px; }
+.tcard:hover { box-shadow:0 8px 32px rgba(124,58,237,.12); transform:translateY(-3px); }
+.stars { display:flex; gap:3px; }
+.star { color:#f59e0b; font-size:1rem; }
+.ttext { font-size:.92rem; color:var(--text-gray); line-height:1.75; flex:1; font-style:italic; }
+.tauthor { display:flex; align-items:center; gap:12px; padding-top:12px; border-top:1px solid var(--border); }
+.avatar { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:.8rem; font-weight:800; flex-shrink:0; }
+.aname { font-size:.93rem; font-weight:700; color:var(--text-dark); }
+.arole { font-size:.8rem; color:var(--text-gray); }
+.dots { display:flex; justify-content:center; gap:8px; margin-top:36px; }
+.dot { width:10px; height:10px; border-radius:50%; border:none; background:var(--border); cursor:pointer; transition:background .2s,transform .2s; padding:0; }
+.dot.active { background:var(--purple); transform:scale(1.3); }
+
+/* ===== PRICING ===== */
+.pricing-sec { padding:80px 24px; background:#f8f7ff; }
+.pricing-inner { max-width:1100px; margin:0 auto; }
+.pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; align-items:start; }
+.price-card { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:32px 28px; position:relative; transition:box-shadow .2s; }
+.price-card:hover { box-shadow:0 8px 32px rgba(124,58,237,.1); }
+.price-card.popular { background:linear-gradient(145deg,#7c3aed,#9333ea); border:none; color:#fff; }
+.pop-badge { position:absolute; top:-14px; left:50%; transform:translateX(-50%); background:#fef3c7; color:#d97706; font-size:.78rem; font-weight:700; padding:4px 16px; border-radius:50px; white-space:nowrap; }
+.plan-name { font-size:1.3rem; font-weight:800; margin-bottom:4px; }
+.popular .plan-name { color:#fff; }
+.plan-sub { font-size:.87rem; color:var(--text-gray); margin-bottom:20px; }
+.popular .plan-sub { color:rgba(255,255,255,.75); }
+.plan-price { margin-bottom:20px; }
+.plan-price .amt { font-size:2.2rem; font-weight:800; color:var(--text-dark); }
+.popular .plan-price .amt { color:#fff; }
+.plan-price .per { font-size:.95rem; color:var(--text-gray); }
+.popular .plan-price .per { color:rgba(255,255,255,.7); }
+.plan-features { list-style:none; margin-bottom:28px; }
+.plan-features li { font-size:.88rem; color:var(--text-gray); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.popular .plan-features li { color:rgba(255,255,255,.85); }
+.pcheck { color:var(--success); font-weight:700; }
+.popular .pcheck { color:#fff; }
+.btn-plan { width:100%; padding:14px; border-radius:12px; font-family:'Manrope',sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.btn-plan.def { background:var(--purple); color:#fff; border:none; }
+.btn-plan.def:hover { background:var(--purple-dark); }
+.btn-plan.pop { background:#fff; color:var(--purple); border:none; }
+.btn-plan.pop:hover { background:#f3f0ff; }
+
+/* ===== FAQ ===== */
+.faq-sec { padding:80px 24px; background:#fff; }
+.faq-inner { max-width:760px; margin:0 auto; text-align:center; }
+.faq-link { color:var(--purple); font-weight:600; }
+.faq-list { margin-top:44px; text-align:left; display:flex; flex-direction:column; gap:12px; }
+.faq-item { background:#fff; border:1.5px solid var(--border); border-radius:12px; overflow:hidden; transition:border-color .2s,box-shadow .2s; }
+.faq-item.open { border-color:var(--purple); box-shadow:0 4px 20px rgba(124,58,237,.08); }
+.faq-q { width:100%; background:none; border:none; padding:20px 24px; display:flex; justify-content:space-between; align-items:center; gap:16px; cursor:pointer; font-family:'Manrope',sans-serif; font-size:.97rem; font-weight:700; color:var(--text-dark); text-align:left; transition:color .2s; }
+.faq-item.open .faq-q { color:var(--purple); }
+.faq-icon { font-size:1.4rem; color:var(--text-gray); flex-shrink:0; transition:transform .25s; line-height:1; display:inline-block; }
+.faq-item.open .faq-icon { transform:rotate(45deg); color:var(--purple); }
+.faq-a { padding:0 24px 20px; animation:fadeDown .2s ease; }
+.faq-a p { font-size:.9rem; color:var(--text-gray); line-height:1.75; }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);} }
+
+/* ===== CTA ===== */
+.cta-sec { background:linear-gradient(135deg,#7c3aed,#a855f7); padding:80px 24px; text-align:center; }
+.cta-inner { max-width:700px; margin:0 auto; }
+.cta-inner h2 { font-size:2.2rem; font-weight:800; color:#fff; margin-bottom:16px; }
+.cta-inner p { font-size:1rem; color:rgba(255,255,255,.8); margin-bottom:32px; line-height:1.7; }
+.cta-btns { display:flex; justify-content:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+.btn-cta-p { background:#fff; color:var(--purple); border:none; padding:14px 28px; border-radius:50px; font-family:'Manrope',sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; }
+.btn-cta-o { background:transparent; color:#fff; border:2px solid rgba(255,255,255,.6); padding:14px 28px; border-radius:50px; font-family:'Manrope',sans-serif; font-size:.95rem; font-weight:700; cursor:pointer; }
+.cta-note { font-size:.85rem; color:rgba(255,255,255,.65); }
+
+/* ===== FOOTER ===== */
+footer { background:#0f172a; padding:60px 24px 0; }
+.footer-top { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1.2fr; gap:40px; padding-bottom:48px; }
+.footer-logo { font-size:1.6rem; font-weight:800; color:#fff; margin-bottom:16px; }
+.footer-tag { font-size:.88rem; color:#94a3b8; line-height:1.8; }
+.flink-group h4 { color:#fff; font-size:.97rem; font-weight:700; margin-bottom:18px; }
+.flink-group ul { list-style:none; display:flex; flex-direction:column; gap:12px; }
+.flink-group a { color:#94a3b8; font-size:.88rem; transition:color .2s; }
+.flink-group a:hover { color:#fff; }
+.fsocial h4 { color:#fff; font-size:.97rem; font-weight:700; margin-bottom:18px; }
+.social-icons { display:flex; gap:10px; }
+.sicon { width:40px; height:40px; background:rgba(255,255,255,.1); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background .2s; }
+.sicon:hover { background:var(--purple); }
+.sicon svg { display:block; }
+.footer-bot { max-width:1200px; margin:0 auto; border-top:1px solid rgba(255,255,255,.08); padding:24px 0; display:flex; justify-content:space-between; align-items:center; }
+.footer-bot p { font-size:.85rem; color:#64748b; }
+.fbot-links { display:flex; gap:24px; }
+.fbot-links a { font-size:.85rem; color:#64748b; transition:color .2s; }
+.fbot-links a:hover { color:#fff; }
+
+/* ===== SCROLL TO TOP ===== */
+#scroll-top { position:fixed; bottom:28px; right:28px; width:46px; height:46px; background:var(--purple); color:#fff; border:none; border-radius:50%; font-size:1.2rem; font-weight:700; cursor:pointer; z-index:999; display:none; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(124,58,237,.35); transition:background .2s,transform .2s; }
+#scroll-top:hover { background:var(--purple-dark); transform:translateY(-3px); }
+#scroll-top.visible { display:flex; }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .products-grid,.testi-grid { grid-template-columns:repeat(2,1fr); }
+  .footer-top { grid-template-columns:1fr 1fr 1fr; }
+  .footer-brand { grid-column:1/-1; }
+  .fsocial { grid-column:span 3; }
+}
+@media(max-width:768px){
+  .nav-links { display:none; }
+  .banner-inner { flex-direction:column; gap:36px; text-align:center; }
+  .banner h1 { font-size:2.2rem; }
+  .banner-btns { justify-content:center; }
+  .stats-inner { flex-direction:column; gap:28px; }
+  .stat-div { width:60px; height:1px; }
+  .products-grid,.steps-grid,.pricing-grid,.testi-grid { grid-template-columns:1fr; }
+  .cta-btns { flex-direction:column; align-items:center; }
+  .footer-top { grid-template-columns:1fr 1fr; }
+  .footer-brand { grid-column:1/-1; }
+  .fsocial { grid-column:1/-1; }
+  .footer-bot { flex-direction:column; gap:16px; text-align:center; }
+}
+@media(max-width:480px){
+  .banner h1 { font-size:1.8rem; }
+  .section-title { font-size:1.7rem; }
+  .stat h2 { font-size:2.2rem; }
+  .footer-top { grid-template-columns:1fr; }
+  .faq-q { font-size:.9rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+<div id="root"></div>
+<button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script type="text/babel">
+
+// ─── DATA ─────────────────────────────────────────────────────────────────
+const PRODUCTS = [
+  { id:1, name:"AI Writing Pro",         desc:"Generate high-quality content, blogs, and marketing copy in seconds with advanced AI.", price:29, period:"monthly",  tag:"Best Seller", tagType:"bestseller", features:["Unlimited AI generations","50+ writing templates","Grammar checker"],       icon:"writing_23274001.png" },
+  { id:2, name:"Design Templates Pack",  desc:"2000+ premium templates for social media, presentations, and marketing materials.",      price:49, period:"one-time", tag:"Popular",     tagType:"popular",    features:["2000+ templates","Monthly updates","Commercial license"],                  icon:"design-tool.png" },
+  { id:3, name:"Premium Stock Assets",   desc:"Access millions of royalty-free photos, videos, and graphics for your projects.",        price:19, period:"monthly",  tag:"New",         tagType:"new",        features:["10M+ assets","Commercial use","No attribution"],                           icon:"portfolio.png" },
+  { id:4, name:"Automation Toolkit",     desc:"Automate repetitive tasks and streamline your workflow with powerful tools.",             price:79, period:"monthly",  tag:"Popular",     tagType:"popular",    features:["50+ automations","API access","Custom workflows"],                         icon:"operation.png" },
+  { id:5, name:"Resume Builder Pro",     desc:"Create professional resumes and cover letters that land interviews.",                    price:15, period:"one-time", tag:"New",         tagType:"new",        features:["100+ templates","ATS optimization","Export to PDF"],                       icon:"portfolio.png" },
+  { id:6, name:"Social Media Kit",       desc:"Complete toolkit for creating engaging social media content across all platforms.",       price:39, period:"monthly",  tag:"Best Seller", tagType:"bestseller", features:["5000+ assets","Scheduler included","Analytics dashboard"],               icon:"social-media.png" },
+  { id:7, name:"SEO Master Suite",       desc:"Dominate search rankings with comprehensive SEO analysis and optimization tools.",        price:59, period:"monthly",  tag:"Popular",     tagType:"popular",    features:["Keyword research","Backlink tracker","Site audit tool"],                    icon:"operation.png" },
+  { id:8, name:"Video Editing Pack",     desc:"Professional-grade video editing templates and effects for content creators.",            price:35, period:"one-time", tag:"New",         tagType:"new",        features:["500+ transitions","LUT presets","4K support"],                              icon:"design-tool.png" },
+];
+
+const TESTIMONIALS = [
+  { id:1, name:"Sarah Johnson",  role:"Content Creator",    avatar:"SJ", color:"#7c3aed", text:"DigiTools completely transformed how I create content. The AI Writing Pro alone saves me 10+ hours every week. I can't imagine going back to the old way." },
+  { id:2, name:"Marcus Chen",    role:"UX Designer",        avatar:"MC", color:"#0ea5e9", text:"The Design Templates Pack is absolutely worth every penny. 2000+ templates that are actually well-designed and professional. My clients keep asking how I deliver so fast." },
+  { id:3, name:"Priya Patel",    role:"Marketing Manager",  avatar:"PP", color:"#10b981", text:"We switched our entire marketing team to DigiTools Pro and productivity went through the roof. The Social Media Content Kit is a game changer for our campaigns." },
+  { id:4, name:"David Kim",      role:"Freelance Developer",avatar:"DK", color:"#f59e0b", text:"The Automation Toolkit pays for itself within the first day. I automated 80% of my repetitive tasks and now focus on the work that actually matters." },
+  { id:5, name:"Amelia Torres",  role:"Startup Founder",    avatar:"AT", color:"#ec4899", text:"As a bootstrapped founder, every dollar counts. DigiTools gives me enterprise-level tools at a fraction of the cost. The ROI is insane — highly recommend the Pro plan." },
+  { id:6, name:"James Wilson",   role:"Video Blogger",      avatar:"JW", color:"#6366f1", text:"Premium Stock Assets is the only subscription I'd never cancel. 10 million+ assets, commercial use rights, no attribution needed. It's everything a creator needs." },
+];
+
+const FAQS = [
+  { q:"Can I try DigiTools before purchasing?",         a:"Yes! We offer a 14-day free trial on all plans with no credit card required. You get full access to explore the tools and decide if they're right for you." },
+  { q:"Can I switch plans at any time?",                a:"Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect immediately and we'll prorate any billing differences automatically." },
+  { q:"What payment methods do you accept?",            a:"We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for Enterprise customers. All payments are secured with SSL encryption." },
+  { q:"Are the digital products available for commercial use?", a:"Yes! All products purchased through DigiTools come with a commercial license, allowing you to use them in client projects, products you sell, and marketing materials." },
+  { q:"How do I download my purchased products?",       a:"After purchase, all your products are instantly available in your account dashboard. You can download them anytime — there's no expiry on your purchases." },
+  { q:"Do you offer refunds?",                          a:"We offer a 30-day money-back guarantee on all plans. If you're not satisfied for any reason, contact our support team and we'll issue a full refund, no questions asked." },
+  { q:"Is there a limit on how many projects I can work on?", a:"Starter plan users get 1 project per month. Pro and Enterprise users get unlimited projects with cloud sync so your work is always accessible across devices." },
+];
+
+// ─── TOAST ────────────────────────────────────────────────────────────────
+function showToast(msg, type="success") {
+  const c = document.getElementById("toast-container");
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  const icons = { success:"✅", error:"❌", warning:"⚠️" };
+  el.innerHTML = `<span>${icons[type]||""}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = "slideOut .3s ease forwards";
+    setTimeout(() => el.remove(), 300);
+  }, 2500);
+}
+
+// ─── SCROLL TO TOP ────────────────────────────────────────────────────────
+window.addEventListener("scroll", () => {
+  const btn = document.getElementById("scroll-top");
+  if (btn) btn.classList.toggle("visible", window.scrollY > 400);
+});
+
+// ─── COMPONENTS ───────────────────────────────────────────────────────────
+const { useState, useEffect } = React;
+
+function Navbar({ cartCount }) {
+  return (
+    <nav className="navbar">
+      <div className="navbar-inner">
+        <div className="logo"><span>Digi</span><span>Tools</span></div>
+        <ul className="nav-links">
+          {["Products","Features","Pricing","Testimonials","FAQ"].map(l => (
+            <li key={l}><a href={`#${l.toLowerCase()}`}>{l}</a></li>
+          ))}
+        </ul>
+        <div className="navbar-right">
+          <div className="cart-wrap">
+            <img src="shopping-cart.png" alt="cart" onError={e=>e.target.style.display='none'}/>
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </div>
+          <button className="btn-login">Login</button>
+          <button className="btn-getstarted">Get Started</button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function Banner() {
+  return (
+    <section className="banner">
+      <div className="banner-inner">
+        <div className="banner-left">
+          <div className="banner-badge"><span className="badge-dot"></span>New: AI-Powered Tools Available</div>
+          <h1>Supercharge Your<br/>Digital Workflow</h1>
+          <p>Access premium AI tools, design assets, templates, and productivity software—all in one place. Start creating faster today.</p>
+          <div className="banner-btns">
+            <button className="btn-explore">Explore Products</button>
+            <button className="btn-watch">
+              <img src="Play.png" alt="play" onError={e=>e.target.style.display='none'}/>
+              Watch Demo
+            </button>
+          </div>
+        </div>
+        <div className="banner-right">
+          <div className="banner-img-wrap">
+            <img src="banner.png" alt="banner" onError={e=>{ e.target.style.display='none'; }}/>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Stats() {
+  return (
+    <section className="stats">
+      <div className="stats-inner">
+        <div className="stat"><h2>50K+</h2><p>Active Users</p></div>
+        <div className="stat-div"></div>
+        <div className="stat"><h2>200+</h2><p>Premium Tools</p></div>
+        <div className="stat-div"></div>
+        <div className="stat"><h2>4.9</h2><p>Rating</p></div>
+      </div>
+    </section>
+  );
+}
+
+function ProductCard({ product, onAdd }) {
+  const [added, setAdded] = useState(false);
+  const tagClass = { popular:"tag-popular", new:"tag-new", bestseller:"tag-bestseller" };
+  const periodLabel = { monthly:"Mo", "one-time":"One-Time", yearly:"Yr" };
+
+  const handleBuy = () => {
+    onAdd(product);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  return (
+    <div className="pcard">
+      {product.tag && <span className={`ptag ${tagClass[product.tagType]||"tag-popular"}`}>{product.tag}</span>}
+      <div className="picon"><img src={product.icon} alt={product.name} onError={e=>e.target.style.opacity='.3'}/></div>
+      <div className="pname">{product.name}</div>
+      <div className="pdesc">{product.desc}</div>
+      <div className="pprice">
+        <span className="amount">${product.price}</span>
+        <span className="period">/{periodLabel[product.period]||product.period}</span>
+      </div>
+      <ul className="pfeatures">
+        {product.features.map((f,i) => <li key={i}><span className="fcheck">✓</span>{f}</li>)}
+      </ul>
+      <button className={`btn-buy ${added?"added":""}`} onClick={handleBuy}>
+        {added ? "Added to Cart ✓" : "Buy Now"}
+      </button>
+    </div>
+  );
+}
+
+function Cart({ items, onRemove, onCheckout }) {
+  const total = items.reduce((s, i) => s + i.price, 0);
+
+  const handleRemove = (item) => {
+    onRemove(item.id);
+    showToast(`"${item.name}" removed from cart`, "error");
+  };
+
+  const handleCheckout = () => {
+    if (!items.length) return;
+    onCheckout();
+    showToast("Checkout successful! Cart cleared.", "success");
+  };
+
+  if (!items.length) return (
+    <div className="cart-empty">
+      <div className="ce-icon">🛒</div>
+      <p>Your cart is empty.</p>
+      <span>Add some products to get started!</span>
+    </div>
+  );
+
+  return (
+    <div className="cart-wrap-box">
+      <div className="cart-box">
+        <div className="cart-title">Your Cart</div>
+        <div className="cart-items-list">
+          {items.map(item => (
+            <div key={item.id} className="cart-item">
+              <div className="cart-item-left">
+                <img src={item.icon} alt={item.name} onError={e=>e.target.style.opacity='.3'}/>
+                <div>
+                  <div className="ci-name">{item.name}</div>
+                  <div className="ci-price">${item.price}</div>
+                </div>
+              </div>
+              <button className="btn-remove" onClick={() => handleRemove(item)}>Remove</button>
+            </div>
+          ))}
+        </div>
+        <div className="cart-total">
+          <span>Total:</span>
+          <span className="total-amt">${total}</span>
+        </div>
+        <button className="btn-checkout" onClick={handleCheckout}>Proceed To Checkout</button>
+      </div>
+    </div>
+  );
+}
+
+function ProductSection({ cart, setCart }) {
+  const [tab, setTab] = useState("products");
+
+  const handleAdd = (product) => {
+    if (cart.find(i => i.id === product.id)) {
+      showToast(`"${product.name}" is already in your cart!`, "warning");
+      return;
+    }
+    setCart(prev => [...prev, product]);
+    showToast(`"${product.name}" added to cart!`, "success");
+  };
+
+  const handleRemove = (id) => setCart(prev => prev.filter(i => i.id !== id));
+  const handleCheckout = () => setCart([]);
+
+  return (
+    <section id="products" className="products-sec">
+      <div className="products-inner">
+        <h2 className="section-title">Premium Digital Tools</h2>
+        <p className="section-sub">Choose from our curated collection of premium digital products designed to boost your productivity and creativity.</p>
+        <div className="tab-btns">
+          <button className={`tab-btn ${tab==="products"?"active":""}`} onClick={()=>setTab("products")}>Products</button>
+          <button className={`tab-btn ${tab==="cart"?"active":""}`} onClick={()=>setTab("cart")}>Cart ({cart.length})</button>
+        </div>
+        <div className="tab-line"></div>
+        {tab === "products"
+          ? <div className="products-grid">{PRODUCTS.map(p => <ProductCard key={p.id} product={p} onAdd={handleAdd}/>)}</div>
+          : <Cart items={cart} onRemove={handleRemove} onCheckout={handleCheckout}/>
+        }
+      </div>
+    </section>
+  );
+}
+
+function Steps() {
+  const steps = [
+    { num:"01", icon:"user.png",    title:"Create Account",  desc:"Sign up for free in seconds. No credit card required to get started." },
+    { num:"02", icon:"package.png", title:"Choose Products", desc:"Browse our catalog and select the tools that fit your needs." },
+    { num:"03", icon:"rocket.png",  title:"Start Creating",  desc:"Download and start using your premium tools immediately." },
+  ];
+  return (
+    <section className="steps-sec">
+      <div className="steps-inner">
+        <h2 className="section-title">Get Started In 3 Steps</h2>
+        <p className="section-sub">Start using premium digital tools in minutes, not hours.</p>
+        <div className="steps-grid">
+          {steps.map((s,i) => (
+            <div key={i} className="step-card">
+              <div className="step-num">{s.num}</div>
+              <div className="step-icon-wrap"><img src={s.icon} alt={s.title} onError={e=>e.target.style.opacity='.3'}/></div>
+              <div className="step-title">{s.title}</div>
+              <div className="step-desc">{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Testimonials() {
+  const [page, setPage] = useState(0);
+  const per = 3;
+  const pages = Math.ceil(TESTIMONIALS.length / per);
+  const visible = TESTIMONIALS.slice(page * per, page * per + per);
+
+  return (
+    <section id="testimonials" className="testi-sec">
+      <div className="testi-inner">
+        <div className="section-badge">What Our Users Say</div>
+        <h2 className="section-title">Loved By 50,000+ Creators</h2>
+        <p className="section-sub">Join thousands of professionals who've transformed their workflow with DigiTools.</p>
+        <div className="testi-grid">
+          {visible.map(t => (
+            <div key={t.id} className="tcard">
+              <div className="stars">{"★★★★★".split("").map((s,i)=><span key={i} className="star">{s}</span>)}</div>
+              <div className="ttext">"{t.text}"</div>
+              <div className="tauthor">
+                <div className="avatar" style={{background:t.color}}>{t.avatar}</div>
+                <div><div className="aname">{t.name}</div><div className="arole">{t.role}</div></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="dots">
+          {Array.from({length:pages}).map((_,i) => (
+            <button key={i} className={`dot ${i===page?"active":""}`} onClick={()=>setPage(i)}/>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Pricing() {
+  const plans = [
+    { name:"Starter",    sub:"Perfect for getting started", price:0,  period:"Month", features:["Access to 10 free tools","Basic templates","Community support","1 project per month"], btn:"Get Started Free", type:"def" },
+    { name:"Pro",        sub:"Best for professionals",      price:29, period:"Month", features:["Access to all premium tools","Unlimited templates","Priority support","Unlimited projects","Cloud sync","Advanced analytics"], btn:"Start Pro Trial", type:"pop", popular:true },
+    { name:"Enterprise", sub:"For teams and businesses",    price:99, period:"Month", features:["Everything in Pro","Team collaboration","Custom integrations","Dedicated support","SLA guarantee","Custom branding"], btn:"Contact Sales", type:"def" },
+  ];
+  return (
+    <section id="pricing" className="pricing-sec">
+      <div className="pricing-inner">
+        <h2 className="section-title">Simple, Transparent Pricing</h2>
+        <p className="section-sub">Choose the plan that fits your needs. Upgrade or downgrade anytime.</p>
+        <div className="pricing-grid">
+          {plans.map((p,i) => (
+            <div key={i} className={`price-card ${p.popular?"popular":""}`}>
+              {p.popular && <div className="pop-badge">Most Popular</div>}
+              <div className="plan-name">{p.name}</div>
+              <div className="plan-sub">{p.sub}</div>
+              <div className="plan-price"><span className="amt">${p.price}</span><span className="per">/{p.period}</span></div>
+              <ul className="plan-features">
+                {p.features.map((f,j) => <li key={j}><span className="pcheck">✓</span>{f}</li>)}
+              </ul>
+              <button className={`btn-plan ${p.type}`}>{p.btn}</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQ() {
+  const [open, setOpen] = useState(null);
+  return (
+    <section id="faq" className="faq-sec">
+      <div className="faq-inner">
+        <div className="section-badge">Got Questions?</div>
+        <h2 className="section-title">Frequently Asked Questions</h2>
+        <p className="section-sub">Everything you need to know about DigiTools. Can't find an answer? <a href="#" className="faq-link">Contact our team.</a></p>
+        <div className="faq-list">
+          {FAQS.map((f,i) => (
+            <div key={i} className={`faq-item ${open===i?"open":""}`}>
+              <button className="faq-q" onClick={()=>setOpen(open===i?null:i)}>
+                <span>{f.q}</span>
+                <span className="faq-icon">+</span>
+              </button>
+              {open === i && <div className="faq-a"><p>{f.a}</p></div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CTA() {
+  return (
+    <section className="cta-sec">
+      <div className="cta-inner">
+        <h2>Ready To Transform Your Workflow?</h2>
+        <p>Join thousands of professionals who are already using Digitools to work smarter.<br/>Start your free trial today.</p>
+        <div className="cta-btns">
+          <button className="btn-cta-p">Explore Products</button>
+          <button className="btn-cta-o">View Pricing</button>
+        </div>
+        <p className="cta-note">14-day free trial • No credit card required • Cancel anytime</p>
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer>
+      <div className="footer-top">
+        <div className="footer-brand">
+          <div className="footer-logo">DigiTools</div>
+          <p className="footer-tag">Premium digital tools for creators,<br/>professionals, and businesses. Work smarter<br/>with our suite of powerful tools.</p>
+        </div>
+        {[
+          { title:"Product",   links:["Features","Pricing","Templates","Integrations"] },
+          { title:"Company",   links:["About","Blog","Careers","Press"] },
+          { title:"Resources", links:["Documentation","Help Center","Community","Contact"] },
+        ].map((g,i) => (
+          <div key={i} className="flink-group">
+            <h4>{g.title}</h4>
+            <ul>{g.links.map(l => <li key={l}><a href="#">{l}</a></li>)}</ul>
+          </div>
+        ))}
+        <div className="fsocial">
+          <h4>Social Links</h4>
+          <div className="social-icons">
+            {[
+              <svg viewBox="0 0 24 24" fill="white" width="18" height="18"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>,
+              <svg viewBox="0 0 24 24" fill="white" width="18" height="18"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>,
+              <svg viewBox="0 0 24 24" fill="white" width="18" height="18"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            ].map((svg,i) => <a key={i} href="#" className="sicon">{svg}</a>)}
+          </div>
+        </div>
+      </div>
+      <div className="footer-bot">
+        <p>© 2026 Digitools. All rights reserved.</p>
+        <div className="fbot-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Cookies</a>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────
+function App() {
+  const [cart, setCart] = useState([]);
+  return (
+    <div>
+      <Navbar cartCount={cart.length}/>
+      <Banner/>
+      <Stats/>
+      <ProductSection cart={cart} setCart={setCart}/>
+      <Steps/>
+      <Testimonials/>
+      <Pricing/>
+      <FAQ/>
+      <CTA/>
+      <Footer/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
